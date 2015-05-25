@@ -5,6 +5,8 @@ defmodule ExUnitApiDocumentation.Mixfile do
     [app: :ex_unit_api_documentation,
      version: "0.0.1",
      elixir: "~> 1.0",
+     elixirc_paths: ["lib", "web"],
+     compilers: [:phoenix] ++ Mix.compilers,
      deps: deps]
   end
 
@@ -12,7 +14,7 @@ defmodule ExUnitApiDocumentation.Mixfile do
   #
   # Type `mix help compile.app` for more information
   def application do
-    [applications: [:logger]]
+    [applications: [:phoenix, :logger]]
   end
 
   # Dependencies can be Hex packages:
@@ -25,6 +27,7 @@ defmodule ExUnitApiDocumentation.Mixfile do
   #
   # Type `mix help deps` for more examples and options
   defp deps do
-    [{:httpoison, path: "/Users/dswain/src/httpoison"}]
+    [{:phoenix, "~> 0.10.0"},
+     {:httpoison, path: "/Users/dswain/src/httpoison"}]
   end
 end
