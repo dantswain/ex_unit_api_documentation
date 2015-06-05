@@ -22,14 +22,18 @@ defmodule MyIntegrationTest do
   use ExUnit.Case
 
   setup_all do
+    # all test requests/responses in this module go to a page/section
+    #   called 'sessions'
     ExUnitApiDocumentation.start_doc("sessions")
 
     on_exit fn ->
+      # actually write out the docs
       ExUnitApiDocumentation.write_json
     end
   end
 
   test "invalid login" do
+    # Everything happens via Test.Endpoint, which is derived from HttPoison.Base
     got = Test.Endpoint.post!("/sessions",
                               Helpers.login_body("test@test.com", "h4xx0r"))
     assert got.status_code == 401
@@ -41,6 +45,7 @@ end
 defmodule My.Router do
   use Phoenix.Router
 
+  # mounts your docs at http://<root url>/docs
   scope "/docs", ExUnitApiDocumentation do
     pipe_through :browser
 
