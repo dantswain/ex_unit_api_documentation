@@ -27,7 +27,8 @@ defmodule ExUnitApiDocumentation.Mixfile do
   #
   # Type `mix help deps` for more examples and options
   defp deps do
-    [{:phoenix, "~> 0.10.0"},
+    [{:phoenix, "~> 0.17.0"},
+     {:phoenix_html, "~>2.1"},
      {:httpoison, git: "http://github.com/dantswain/httpoison", branch: "request_refactor"}]
   end
 end
