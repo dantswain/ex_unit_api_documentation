@@ -43,12 +43,12 @@ defmodule ExUnitApiDocumentation do
 
   def to_json do
     docs
-    |> Enum.map(fn(doc) -> to_json(doc) end)
-    |> Enum.join("\n")
+    |> Enum.map(fn(doc) -> to_pre_json(doc) end)
+    |> Poison.encode!
   end
 
-  def to_json({method, url, request_headers, request_body, resp}) do
-    m = %{http_method: method,
+  def to_pre_json({method, url, request_headers, request_body, resp}) do
+    %{http_method: method,
       route: url,
       requests: [
         %{request_method: method,
@@ -59,7 +59,6 @@ defmodule ExUnitApiDocumentation do
           response_body: resp.body,
           response_headers: resp.headers |> Enum.into(Map.new)}
       ]
-         }
-    m|> Poison.encode!
+     }
   end
 end
