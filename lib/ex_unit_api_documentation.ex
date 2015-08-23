@@ -4,8 +4,8 @@ defmodule ExUnitApiDocumentation do
   end
 
   # List.keyfind(headers, "x-request-id", 0, {nil, nil}) |> elem(1)
-  def start_link do
-    Agent.start_link(fn -> %State{} end, name: __MODULE__)
+  def start do
+    Agent.start(fn -> %State{} end, name: __MODULE__)
   end
 
   def clear do
@@ -60,7 +60,6 @@ defmodule ExUnitApiDocumentation do
           response_headers: resp.headers |> Enum.into(Map.new)}
       ]
          }
-    IO.puts(inspect m)
     m|> Poison.encode!
   end
 end
