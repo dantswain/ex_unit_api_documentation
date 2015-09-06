@@ -14,45 +14,145 @@ this, `ExUnitApiDocumentation.DocsController` serves up the data in a
 nice format in the browser.
 
 The basic approach to integration testing that this assumes is the one
-I documented on my blog:
+I documented here:
 [Integration Testing a JSON API in Phoenix](http://www.dantswain.com/blog/2015/04/19/integration-testing-a-json-api-in-phoenix/).
 
-```elixir
-defmodule MyIntegrationTest do
-  use ExUnit.Case
+See
+[dantswain/ex_unit_api_documentation_test_app](dantswain/ex_unit_api_documentation)
+for an example of usage and setup.
 
-  setup_all do
-    # all test requests/responses in this module go to a page/section
-    #   called 'sessions'
-    ExUnitApiDocumentation.start_doc("sessions")
+## Status
 
-    on_exit fn ->
-      # actually write out the docs
-      ExUnitApiDocumentation.write_json
+The documentation engine is mostly working in a basic sense.  The HTTP
+requests are collected and dumped to a json file.  There is currently
+no support for explanation or other annotations.
+
+Serving of the documentation is currently only working in a
+proof-of-concept sense.  The '/docs' page has no styling and the
+documentation json is displayed raw.
+
+I'm sure that the way I've accomplished some things, especially around
+the setup needed for documentation serving, is suboptimal.  If you
+know Phoenix well and have suggestions, I would be most appreciative!
+
+## Usage
+
+First, add `ex_unit_api_documentation` to your mix.exs file both as a
+dependendency and as an application to start:
+
+    # in mix.exs
+
+    def application do
+      [
+        ...
+        applications: [..., :ex_unit_api_documentation]
+      ]
     end
-  end
 
-  test "invalid login" do
-    # Everything happens via Test.Endpoint, which is derived from HttPoison.Base
-    got = Test.Endpoint.post!("/sessions",
-                              Helpers.login_body("test@test.com", "h4xx0r"))
-    assert got.status_code == 401
-  end
-end
-```
+    defp deps do
+      [
+       ...
+       {:ex_unit_api_documentation, github: "dantswain/ex_unit_api_documentation"},
+       ...
+      ]
+    end
 
-```elixir
-defmodule My.Router do
-  use Phoenix.Router
+Next, add an API endpoint helper for your test suite.  This is a
+module that should include `use HTTPoison.Base`, a function to launch
+your API, and a call to `ExUnitApiDocumentation.document/5` within the
+`execute_request` function.  See
+[api.ex](https://github.com/dantswain/ex_unit_api_documentation_test_app/blob/master/test/support/api.ex)
+in [dantswain/ex_unit_api_documentation_test_app] for an example.
 
-  # mounts your docs at http://<root url>/docs
-  scope "/docs", ExUnitApiDocumentation do
-    pipe_through :browser
+**Note** ExUnitApiDocumentation uses a fork of HTTPoison that allows
+  an override of the `execute_request` function.  I have a
+  [pull request](https://github.com/edgurgel/httpoison/pull/51) open
+  for this.
 
-    get "/", DocsController, :index
-  end
-end
-```
+Next, write your tests.  Here is an example.
+
+    defmodule ExUnitApiDocumentationTestApp.ApiTest do
+      use ExUnit.Case
+      
+      alias ExUnitApiDocumentationTestApp.Support.API
+      
+      setup_all do
+        API.launch
+        
+        ExUnitApiDocumentation.start
+        ExUnitApiDocumentation.start_doc("api")
+        
+        on_exit fn ->
+          # actually write out the docs
+          ExUnitApiDocumentation.write_json
+        end
+      end
+      
+      test "GET /" do
+        got = API.get!("/")
+        assert got.status_code == 200
+      end
+    end
+
+The important points of the example are
+
+* Call `API.launch` in `setup_all` - This enables the web serving
+  aspect of your API during tests.
+* `ExUnitApiDocumentation.start` and
+  `ExUnitApiDocumentation.start_doc("api")` in `setup_all` - This
+  starts the documentation engine listening and gives it a heading
+  name ("api") for this test file.
+* `ExUnitApiDocumentation.write_json` in the `on_exit` callback - This
+  causes the documentation to be written out at the end of the tests.
+* Use your API endpoint helper for all HTTP calls during tests.  This
+  is how ExUnitApiDocumentation collects the documentation data.
+
+## Serving test documentation
+
+Add `ex_unit_api_documentation` to your 'brunch-config.js' file.  This
+makes the documentation driver ('docs.js') available to your
+application.
+
+    // in brunch-config.js
+    
+    // Phoenix paths configuration
+    paths: {
+      // Dependencies and current project directories to watch
+      watched: ["deps/phoenix/web/static",
+        "deps/phoenix_html/web/static",
+        "web/static", "test/static",
+        "deps/ex_unit_api_documentation/web/static"], // <- add this
+    
+      // Where to compile files to
+      public: "priv/static"
+    },
+
+Add 'docs' to the static plug in your 'endpoint.ex'.  This makes the
+documentation output available to your application's static asset
+server. 
+
+    # in endpoint.ex
+
+    plug Plug.Static,
+    at: "/", from: :ex_unit_api_documentation_test_app, gzip: false,
+        only: ~w(css fonts images js favicon.ico robots.txt docs)
+
+Import the documentation driver in your 'web/static/js/app.js'.  This
+makes the documentation driver execute when the docs page loads.
+
+    // in web/static/js/app.js
+    import "ex_unit_api_documentation/web/static/js/docs"
+
+Add the '/docs' namespace to your router.ex.  This makes it so that
+when someone navigates to '/docs', it loads the necessary code from
+ExUnitApiDocumentation.
+
+    # in router.ex
+    scope "/docs", ExUnitApiDocumentation do
+      pipe_through :browser
+      
+      get "/", DocsController, :index
+    end
 
 ## Help Needed
 
