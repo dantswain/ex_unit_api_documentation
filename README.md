@@ -143,7 +143,7 @@ Import the documentation driver in your 'web/static/js/app.js'.  This
 makes the documentation driver execute when the docs page loads.
 
     // in web/static/js/app.js
-    import "ex_unit_api_documentation/web/static/js/docs"
+    import "deps/ex_unit_api_documentation/web/static/js/docs"
 
 Add the '/docs' namespace to your router.ex.  This makes it so that
 when someone navigates to '/docs', it loads the necessary code from
