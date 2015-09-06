@@ -18,7 +18,7 @@ I documented here:
 [Integration Testing a JSON API in Phoenix](http://www.dantswain.com/blog/2015/04/19/integration-testing-a-json-api-in-phoenix/).
 
 See
-[dantswain/ex_unit_api_documentation_test_app](dantswain/ex_unit_api_documentation)
+[ex_unit_api_documentation_test_app](http://github.com/dantswain/ex_unit_api_documentation_test_app)
 for an example of usage and setup.
 
 ## Status
@@ -62,7 +62,9 @@ module that should include `use HTTPoison.Base`, a function to launch
 your API, and a call to `ExUnitApiDocumentation.document/5` within the
 `execute_request` function.  See
 [api.ex](https://github.com/dantswain/ex_unit_api_documentation_test_app/blob/master/test/support/api.ex)
-in [dantswain/ex_unit_api_documentation_test_app] for an example.
+in
+[ex_unit_api_documentation_test_app](http://github.com/dantswain/ex_unit_api_documentation_test_app)
+for an example.
 
 **Note** ExUnitApiDocumentation uses a fork of HTTPoison that allows
   an override of the `execute_request` function.  I have a
