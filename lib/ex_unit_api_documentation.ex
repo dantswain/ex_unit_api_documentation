@@ -8,6 +8,10 @@ defmodule ExUnitApiDocumentation do
     Agent.start(fn -> %State{} end, name: __MODULE__)
   end
 
+  def stop do
+    Agent.stop(__MODULE__)
+  end
+
   def clear do
     Agent.update(__MODULE__, fn(_) -> %State{} end)
   end
