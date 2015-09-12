@@ -69,7 +69,16 @@ defmodule ExUnitApiDocumentation do
   def to_json do
     docs
     |> Enum.map(fn(doc) -> to_pre_json(doc) end)
+    |> add_metadata
     |> Poison.encode!
+  end
+
+  def add_metadata(data) do
+    %{metadata() | docs: data}
+  end
+
+  def metadata() do
+    %{docs: [], name: name()}
   end
 
   def to_pre_json({method, url, request_headers, request_body, resp}) do
