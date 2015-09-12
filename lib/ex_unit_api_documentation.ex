@@ -1,5 +1,6 @@
 defmodule ExUnitApiDocumentation do
   alias ExUnitApiDocumentation.Worker
+  alias ExUnitApiDocumentation.Formatter
 
   def start do
     Worker.start()
@@ -37,7 +38,7 @@ defmodule ExUnitApiDocumentation do
   defp write_json(state) do
     path = Path.join([docs_root(), "docs", state.name <> ".json"])
     File.mkdir_p!(Path.dirname(path))
-    File.write!(path, to_json(state), [:write])
+    File.write!(path, Formatter.format_json(state), [:write])
     update_index(path)
   end
 
@@ -59,35 +60,5 @@ defmodule ExUnitApiDocumentation do
     index_set = :sets.from_list(index)
     index_set = :sets.add_element(url_path(path), index_set)
     File.write!(index_path, Poison.encode!(:sets.to_list(index_set)), [:write])
-  end
-
-  def to_json(state) do
-    state.docs
-    |> Enum.map(fn(doc) -> to_pre_json(doc) end)
-    |> add_metadata(state)
-    |> Poison.encode!
-  end
-
-  def add_metadata(data, state) do
-    %{metadata(state) | docs: data}
-  end
-
-  def metadata(state) do
-    %{docs: [], name: state.name}
-  end
-
-  def to_pre_json({method, url, request_headers, request_body, resp}) do
-    %{http_method: method,
-      route: url,
-      requests: [
-        %{request_method: method,
-          request_path: url,
-          request_headers: request_headers |> Enum.into(Map.new),
-          request_body: request_body,
-          status_code: resp.status_code,
-          response_body: resp.body,
-          response_headers: resp.headers |> Enum.into(Map.new)}
-      ]
-     }
   end
 end
