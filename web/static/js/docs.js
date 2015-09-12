@@ -13,11 +13,11 @@ class Docs {
     str += verb.toUpperCase() + ' ' + path + '</span>';
     str += '<dl>';
     str += '<dt>Request body</dt>';
-    str += '<dd>' + requestBody + '</dd>';
+    str += '<dd>' + JSON.stringify(requestBody) + '</dd>';
     str += '<dt>Response status</dt>';
     str += '<dd>' + statusCode + '</dd>';
     str += '<dt>Response Body</dt>';
-    str += '<dd>' + responseBody + '</dd>';
+    str += '<dd>' + JSON.stringify(responseBody) + '</dd>';
     str += '</dl>';
     return str;
   }
