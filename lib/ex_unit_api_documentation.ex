@@ -25,22 +25,19 @@ defmodule ExUnitApiDocumentation do
     Worker.document(method, url, request_headers, request_body, resp)
   end
 
-  def docs do
-    Worker.docs()
-  end
-
-  def name do
-    Worker.name()
-  end
-
   def docs_root do
     Path.join([".", "priv", "static"])
   end
 
   def write_json do
-    path = Path.join([docs_root(), "docs", name <> ".json"])
+    state = Worker.state()
+    write_json(state)
+  end
+    
+  defp write_json(state) do
+    path = Path.join([docs_root(), "docs", state.name <> ".json"])
     File.mkdir_p!(Path.dirname(path))
-    File.write!(path, to_json, [:write])
+    File.write!(path, to_json(state), [:write])
     update_index(path)
   end
 
@@ -64,19 +61,19 @@ defmodule ExUnitApiDocumentation do
     File.write!(index_path, Poison.encode!(:sets.to_list(index_set)), [:write])
   end
 
-  def to_json do
-    docs
+  def to_json(state) do
+    state.docs
     |> Enum.map(fn(doc) -> to_pre_json(doc) end)
-    |> add_metadata
+    |> add_metadata(state)
     |> Poison.encode!
   end
 
-  def add_metadata(data) do
-    %{metadata() | docs: data}
+  def add_metadata(data, state) do
+    %{metadata(state) | docs: data}
   end
 
-  def metadata() do
-    %{docs: [], name: name()}
+  def metadata(state) do
+    %{docs: [], name: state.name}
   end
 
   def to_pre_json({method, url, request_headers, request_body, resp}) do

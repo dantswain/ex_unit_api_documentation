@@ -30,11 +30,7 @@ defmodule ExUnitApiDocumentation.Worker do
     end)
   end
 
-  def docs do
-    Agent.get(__MODULE__, fn(state) -> state.docs end)
-  end
-
-  def name do
-    Agent.get(__MODULE__, fn(state) -> state.name end)
+  def state do
+    Agent.get(__MODULE__, fn(state) -> state end)
   end
 end
