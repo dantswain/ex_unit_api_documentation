@@ -1,23 +1,20 @@
 defmodule ExUnitApiDocumentation do
-  defmodule State do
-    defstruct path: nil, name: nil, docs: []
-  end
+  alias ExUnitApiDocumentation.Worker
 
-  # List.keyfind(headers, "x-request-id", 0, {nil, nil}) |> elem(1)
   def start do
-    Agent.start(fn -> %State{} end, name: __MODULE__)
+    Worker.start()
   end
 
   def stop do
-    Agent.stop(__MODULE__)
+    Worker.stop()
   end
 
   def clear do
-    Agent.update(__MODULE__, fn(_) -> %State{} end)
+    Worker.clear()
   end
 
   def start_doc(name) do
-    Agent.update(__MODULE__, fn(state) -> %{state | name: name} end)
+    Worker.start_doc(name)
   end
 
   def document(method,
@@ -25,18 +22,15 @@ defmodule ExUnitApiDocumentation do
                request_headers,
                request_body,
                resp) do
-    Agent.update(__MODULE__, fn(state) ->
-      doc = {method, url, request_headers, request_body, resp}
-      %{state | docs: [doc | state.docs]}
-    end)
+    Worker.document(method, url, request_headers, request_body, resp)
   end
 
   def docs do
-    Agent.get(__MODULE__, fn(state) -> state.docs end)
+    Worker.docs()
   end
 
   def name do
-    Agent.get(__MODULE__, fn(state) -> state.name end)
+    Worker.name()
   end
 
   def docs_root do
